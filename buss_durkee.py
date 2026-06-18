@@ -388,30 +388,50 @@ class BussDurkeeFuzzySystem:
         }
         self.bd_output = {'range': [0, 100], 'mfs': {}}
 
-        # Функции для AL, Negativism, Guilt
-        for input_name in ['AL', 'Negativism', 'Guilt']:
-            self.bd_inputs[input_name]['mfs']['low'] = lambda x: self.linzmf(x, 24, 34)
-            self.bd_inputs[input_name]['mfs']['middle'] = lambda x: self.trap_mf(x, 24, 34, 47, 57)
-            self.bd_inputs[input_name]['mfs']['elevated'] = lambda x: self.trap_mf(x, 47, 57, 70, 80)
-            self.bd_inputs[input_name]['mfs']['high'] = lambda x: self.trimf(x, 70, 80, 90)
-            self.bd_inputs[input_name]['mfs']['very high'] = lambda x: self.linsmf(x, 80, 90)
+        # Функции принадлежности для AL (Уровень агрессии)
+        self.bd_inputs['AL']['mfs']['low'] = lambda x: self.linzmf(x, 24, 34)
+        self.bd_inputs['AL']['mfs']['middle'] = lambda x: self.trap_mf(x, 24, 34, 47, 57)
+        self.bd_inputs['AL']['mfs']['elevated'] = lambda x: self.trap_mf(x, 47, 57, 70, 80)
+        self.bd_inputs['AL']['mfs']['high'] = lambda x: self.trimf(x, 70, 80, 90)
+        self.bd_inputs['AL']['mfs']['very_high'] = lambda x: self.linsmf(x, 80, 90)
 
-        # Функции для Hostility
+        # Функции принадлежности для Hostility (Враждебность)
         self.bd_inputs['Hostility']['mfs']['low'] = lambda x: self.linzmf(x, 9, 19)
         self.bd_inputs['Hostility']['mfs']['middle'] = lambda x: self.trap_mf(x, 9, 19, 31, 41)
         self.bd_inputs['Hostility']['mfs']['elevated'] = lambda x: self.trap_mf(x, 31, 41, 54, 64)
         self.bd_inputs['Hostility']['mfs']['high'] = lambda x: self.trimf(x, 54, 64, 74)
-        self.bd_inputs['Hostility']['mfs']['very high'] = lambda x: self.linsmf(x, 64, 74)
+        self.bd_inputs['Hostility']['mfs']['very_high'] = lambda x: self.linsmf(x, 64, 74)
 
-        # Функции для выхода
+        # Функции принадлежности для Negativism (Негативизм)
+        self.bd_inputs['Negativism']['mfs']['low'] = lambda x: self.linzmf(x, 24, 34)
+        self.bd_inputs['Negativism']['mfs']['middle'] = lambda x: self.trap_mf(x, 24, 34, 47, 57)
+        self.bd_inputs['Negativism']['mfs']['elevated'] = lambda x: self.trap_mf(x, 47, 57, 70, 80)
+        self.bd_inputs['Negativism']['mfs']['high'] = lambda x: self.trimf(x, 70, 80, 90)
+        self.bd_inputs['Negativism']['mfs']['very_high'] = lambda x: self.linsmf(x, 80, 90)
+
+        # Функции принадлежности для Guilt (Чувство вины)
+        self.bd_inputs['Guilt']['mfs']['low'] = lambda x: self.linzmf(x, 24, 34)
+        self.bd_inputs['Guilt']['mfs']['middle'] = lambda x: self.trap_mf(x, 24, 34, 47, 57)
+        self.bd_inputs['Guilt']['mfs']['elevated'] = lambda x: self.trap_mf(x, 47, 57, 70, 80)
+        self.bd_inputs['Guilt']['mfs']['high'] = lambda x: self.trimf(x, 70, 80, 90)
+        self.bd_inputs['Guilt']['mfs']['very_high'] = lambda x: self.linsmf(x, 80, 90)
+
+        # Функции принадлежности для ВЫХОДА
         self.bd_output['mfs']['low'] = lambda x: self.linzmf(x, 15, 25)
         self.bd_output['mfs']['middle'] = lambda x: self.trap_mf(x, 15, 25, 35, 45)
         self.bd_output['mfs']['elevated'] = lambda x: self.trap_mf(x, 35, 45, 55, 65)
         self.bd_output['mfs']['high'] = lambda x: self.trap_mf(x, 55, 65, 75, 85)
-        self.bd_output['mfs']['very high'] = lambda x: self.linsmf(x, 75, 85)
+        self.bd_output['mfs']['very_high'] = lambda x: self.linsmf(x, 75, 85)
 
         # Правила
         self.bd_rules = [
+            (3, 5, 4, 4, 4),
+            (3, 5, 5, 4, 4),
+            (3, 5, 5, 5, 5),
+            (4, 5, 4, 4, 4),
+            (4, 5, 4, 5, 5),
+            (4, 5, 5, 4, 5),
+            (4, 5, 5, 5, 5),
             (1, 1, 1, 0, 1), (1, 1, 2, 0, 1), (1, 1, 3, 0, 1), (1, 1, 4, 0, 1), (1, 1, 5, -2, 1),
             (1, 1, 5, 2, 2), (1, 2, 1, 0, 1), (1, 2, 2, 0, 1), (1, 2, 3, 0, 1), (1, 2, 4, 1, 2),
             (1, 2, 4, -1, 1), (1, 2, 5, 1, 2), (1, 2, 5, 2, 2), (1, 2, 5, 3, 2), (1, 2, 5, 4, 1),
@@ -450,8 +470,9 @@ class BussDurkeeFuzzySystem:
             (3, 4, 4, 5, 2), (3, 4, 5, 1, 4), (3, 4, 5, 2, 4), (3, 4, 5, 3, 3), (3, 4, 5, 4, 3),
             (3, 4, 5, 5, 3), (3, 5, 1, 1, 3), (3, 5, 1, 2, 3), (3, 5, 1, 3, 2), (3, 5, 1, 4, 2),
             (3, 5, 1, 5, 2), (3, 5, 2, 1, 3), (3, 5, 2, 2, 3), (3, 5, 2, 3, 3), (3, 5, 2, 4, 2),
-            (3, 5, 2, 5, 2), (3, 5, 3, -5, 3), (3, 5, 3, 5, 2), (3, 5, 4, 1, 4), (3, 5, 4, -1, 3),
-            (3, 5, 5, 1, 4), (3, 5, 5, 2, 4), (3, 5, 5, 3, 3), (3, 5, 5, 4, 3), (3, 5, 5, 5, 3),
+            (3, 5, 2, 5, 2), (3, 5, 3, -5, 3), (3, 5, 3, 5, 2), (3, 5, 4, 1, 4), #(3, 5, 4, -1, 3),
+            (3, 5, 5, 1, 4), (3, 5, 5, 2, 4), (3, 5, 5, 3, 4), (3, 5, 5, 4, 3),
+            (3, 5, 5, 5, 3),
             (4, 1, 1, -5, 2), (4, 1, 1, 5, 1), (4, 1, 2, 1, 3), (4, 1, 2, -1, 2), (4, 1, 3, 1, 3),
             (4, 1, 3, 2, 3), (4, 1, 3, 3, 2), (4, 1, 3, 4, 2), (4, 1, 3, 5, 2), (4, 1, 4, 1, 3),
             (4, 1, 4, 2, 3), (4, 1, 4, 3, 3), (4, 1, 4, 4, 2), (4, 1, 4, 5, 2), (4, 1, 5, -5, 3),
@@ -466,7 +487,7 @@ class BussDurkeeFuzzySystem:
             (4, 4, 3, 5, 3), (4, 4, 4, 1, 4), (4, 4, 4, 2, 4), (4, 4, 4, 3, 4), (4, 4, 4, 4, 3),
             (4, 4, 4, 5, 3), (4, 4, 5, -5, 4), (4, 4, 5, 5, 3), (4, 5, 1, 1, 4), (4, 5, 1, -1, 3),
             (4, 5, 2, 1, 4), (4, 5, 2, 2, 4), (4, 5, 2, 3, 3), (4, 5, 2, 4, 3), (4, 5, 2, 5, 3),
-            (4, 5, 3, 1, 4), (4, 5, 3, 2, 4), (4, 5, 3, 3, 4), (4, 5, 3, 4, 3), (4, 5, 3, 5, 3),
+            (4, 5, 3, 1, 4), (4, 5, 3, 2, 4), (4, 5, 3, 3, 4), (4, 5, 3, 4, 5), (4, 5, 3, 5, 4),
             (4, 5, 4, -5, 4), (4, 5, 4, 5, 3), (4, 5, 5, 1, 5), (4, 5, 5, 2, 4), (4, 5, 5, 3, 4),
             (4, 5, 5, 4, 4), (4, 5, 5, 5, 3), (5, 1, 1, 1, 3), (5, 1, 1, 2, 3), (5, 1, 1, 3, 3),
             (5, 1, 1, 4, 2), (5, 1, 1, 5, 2), (5, 1, 2, -5, 3), (5, 1, 2, 5, 2), (5, 1, 3, 1, 4),
@@ -484,8 +505,8 @@ class BussDurkeeFuzzySystem:
             (5, 4, 2, 3, 4), (5, 4, 2, 4, 3), (5, 4, 2, 5, 3), (5, 4, 3, -5, 4), (5, 4, 3, 5, 3),
             (5, 4, 4, 0, 4), (5, 4, 5, 1, 5), (5, 4, 5, 2, 5), (5, 4, 5, 3, 4), (5, 4, 5, 4, 4),
             (5, 4, 5, 5, 4), (5, 5, 1, -5, 4), (5, 5, 1, 5, 3), (5, 5, 2, 0, 4), (5, 5, 3, 1, 5),
-            (5, 5, 3, -1, 4), (5, 5, 4, 1, 5), (5, 5, 4, 2, 5), (5, 5, 4, 3, 5), (5, 5, 4, 4, 4),
-            (5, 5, 4, 5, 4), (5, 5, 5, -5, 5), (5, 5, 5, 5, 4)
+            (5, 5, 3, -1, 4), (5, 5, 4, 1, 5), (5, 5, 4, 2, 5), (5, 5, 4, 3, 5), (5, 5, 4, 4, 5),
+            (5, 5, 4, 5, 4), (5, 5, 5, -5, 5), (5, 5, 5, 5, 5)
         ]
 
     def calculate_aggression_level(self, assault, ia, irritability, va):
@@ -503,6 +524,7 @@ class BussDurkeeFuzzySystem:
         output_range = np.arange(0, 101, 1)
         return self.evaluate_rules(inputs_fuzzy, self.hostility_rules, output_range, self.hostility_output['mfs'])
 
+
     def calculate_deviance(self, al, hostility, negativism, guilt):
         inputs_fuzzy = {
             'AL': self.fuzzify(al, self.bd_inputs['AL']['mfs']),
@@ -512,6 +534,7 @@ class BussDurkeeFuzzySystem:
         }
         output_range = np.arange(0, 101, 1)
         return self.evaluate_rules(inputs_fuzzy, self.bd_rules, output_range, self.bd_output['mfs'])
+
 
 class BussDurkeeResultsTable(FullscreenMixin):
     def __init__(self, parent, scores, fio=None, age=None, gender=None):
@@ -907,6 +930,89 @@ class BussDurkeeQuizApp(FullscreenMixin):
         from main import MainMenu
         MainMenu(self.root, self.user_fio, self.user_gender, self.user_age)
 
+    def _debug_deviance_rules(self, al, hostility, negativism, guilt, deviance):
+
+        al_fuzzy = self.fuzzy_system.fuzzify(al, self.fuzzy_system.bd_inputs['AL']['mfs'])
+        h_fuzzy = self.fuzzy_system.fuzzify(hostility, self.fuzzy_system.bd_inputs['Hostility']['mfs'])
+        n_fuzzy = self.fuzzy_system.fuzzify(negativism, self.fuzzy_system.bd_inputs['Negativism']['mfs'])
+        g_fuzzy = self.fuzzy_system.fuzzify(guilt, self.fuzzy_system.bd_inputs['Guilt']['mfs'])
+
+        # Термы для каждой шкалы
+        al_terms = ['low', 'middle', 'elevated', 'high', 'very_high']
+        h_terms = ['low', 'middle', 'elevated', 'high', 'very_high']
+        n_terms = ['low', 'middle', 'elevated', 'high', 'very_high']
+        g_terms = ['low', 'middle', 'elevated', 'high', 'very_high']
+
+        print("ОТЛАДКА ИТОГОВОЙ СИСТЕМЫ БАССА-ДАРКИ")
+
+        print("\n1. ФАЗЗИФИКАЦИЯ ВХОДНЫХ ЗНАЧЕНИЙ:")
+        print(f"   AL (Уровень агрессии) = {al}")
+        for i, t in enumerate(al_terms, 1):
+            val = al_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      AL: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Hostility (Враждебность) = {hostility}")
+        for i, t in enumerate(h_terms, 1):
+            val = h_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Hostility: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Negativism (Негативизм) = {negativism}")
+        for i, t in enumerate(n_terms, 1):
+            val = n_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Negativism: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Guilt (Чувство вины) = {guilt}")
+        for i, t in enumerate(g_terms, 1):
+            val = g_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Guilt: {t} (индекс {i}) = {val:.3f}")
+
+        print("\n2. АКТИВИРОВАННЫЕ ПРАВИЛА:")
+
+        active_rules = []
+        for rule in self.fuzzy_system.bd_rules:
+            al_idx, h_idx, n_idx, g_idx, out = rule
+
+            # Пропускаем индексы 0 (don't care) и отрицательные
+            al_val = 1.0 if al_idx == 0 or al_idx < 0 else al_fuzzy.get(al_terms[al_idx - 1], 0) if 1 <= al_idx <= len(
+                al_terms) else 0
+            h_val = 1.0 if h_idx == 0 or h_idx < 0 else h_fuzzy.get(h_terms[h_idx - 1], 0) if 1 <= h_idx <= len(
+                h_terms) else 0
+            n_val = 1.0 if n_idx == 0 or n_idx < 0 else n_fuzzy.get(n_terms[n_idx - 1], 0) if 1 <= n_idx <= len(
+                n_terms) else 0
+            g_val = 1.0 if g_idx == 0 or g_idx < 0 else g_fuzzy.get(g_terms[g_idx - 1], 0) if 1 <= g_idx <= len(
+                g_terms) else 0
+
+            activation = min(al_val, h_val, n_val, g_val)
+            if activation > 0.01:
+                active_rules.append((rule, activation, out))
+
+        active_rules.sort(key=lambda x: x[1], reverse=True)
+
+        out_names = {1: 'low (очень низкий)', 2: 'middle (низкий)',
+                     3: 'elevated (средний)', 4: 'high (высокий)', 5: 'very_high (критический)'}
+
+        for rule, activation, out in active_rules[:30]:
+            al_idx, h_idx, n_idx, g_idx, out = rule
+            print(f"   Rule ({al_idx},{h_idx},{n_idx},{g_idx}) → out={out}, активация={activation:.3f}")
+
+        print(f"\n   Всего активных правил: {len(active_rules)}")
+
+        # Максимальная активация по выходным термам
+        max_out = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        for rule, activation, out in active_rules:
+            max_out[out] = max(max_out[out], activation)
+
+        print("\n3. МАКСИМАЛЬНАЯ АКТИВАЦИЯ ПО ВЫХОДНЫМ ТЕРМАМ:")
+        for out, act in max_out.items():
+            if act > 0:
+                print(f"   {out_names.get(out)}: {act:.3f}")
+
+        print(f"\n4. ИТОГОВЫЙ РЕЗУЛЬТАТ: {deviance:.2f}")
+
     def show_welcome(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -975,6 +1081,8 @@ class BussDurkeeQuizApp(FullscreenMixin):
         btn_frame.pack(fill=tk.X, pady=15)
         tk.Button(btn_frame, text="Начать тест", command=self.start_test, bg="#9b59b6", fg="white",
                   font=("Segoe UI", 11, "bold"), padx=25, pady=8, relief=tk.FLAT, cursor="hand2").pack()
+        tk.Button(btn_frame, text="Ввести результаты вручную", command=self.manual_input, bg="#95a5a6", fg="white",
+                  font=("Segoe UI", 10), padx=20, pady=5, relief=tk.FLAT, cursor="hand2").pack(pady=(8, 0))
 
     def start_test(self):
         if not self.user_fio:
@@ -1037,6 +1145,99 @@ class BussDurkeeQuizApp(FullscreenMixin):
                                  bg="#ffffff", cursor="hand2")
         help_link.pack(pady=(10, 5))
         help_link.bind("<Button-1>", lambda e: self.toggle_description())
+
+    def manual_input(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Ручной ввод - Басса-Дарки")
+        dialog.geometry("500x600")
+        dialog.configure(bg="#f0f4f8")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        try:
+            dialog.iconbitmap("icon.ico")
+        except:
+            pass
+
+        tk.Label(dialog, text="Введите баллы по шкалам (0-100)", font=("Segoe UI", 12, "bold"), fg="#2c3e50",
+                 bg="#f0f4f8").pack(pady=10)
+
+        canvas = tk.Canvas(dialog, bg="#f0f4f8", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
+        scroll_frame = tk.Frame(canvas, bg="#f0f4f8")
+        scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        entries = {}
+        scales = ["Физическая агрессия", "Косвенная агрессия", "Раздражение", "Негативизм",
+                  "Обида", "Подозрительность", "Вербальная агрессия", "Угрызения совести"]
+
+        for s in scales:
+            frame = tk.Frame(scroll_frame, bg="#f0f4f8")
+            frame.pack(fill=tk.X, padx=20, pady=3)
+            tk.Label(frame, text=s, font=("Segoe UI", 10), width=25, anchor="w", bg="#f0f4f8").pack(side=tk.LEFT)
+            var = tk.DoubleVar(value=50)
+            entries[s] = var
+            tk.Scale(frame, from_=0, to=100, orient="horizontal", variable=var, length=200, bg="#f0f4f8",
+                     troughcolor="#d5dbdb").pack(side=tk.LEFT, padx=10)
+
+        canvas.pack(side="left", fill="both", expand=True, padx=10)
+        scrollbar.pack(side="right", fill="y")
+
+        def calc():
+            scores = {n: v.get() for n, v in entries.items()}
+            dialog.destroy()
+            self.calculate_from_scores(scores, self.user_fio, self.user_gender, self.user_age)
+
+        tk.Button(dialog, text="Рассчитать", command=calc, bg="#9b59b6", fg="white", font=("Segoe UI", 11), padx=20,
+                  pady=5, relief=tk.FLAT).pack(pady=15)
+
+    def calculate_from_scores(self, bd_scores, fio=None, gender=None, age=None):
+        if fio:
+            self.user_fio = fio
+        if gender:
+            self.user_gender = gender
+        if age:
+            self.user_age = age
+
+        # Получаем значения по шкалам
+        assault = bd_scores["Физическая агрессия"]
+        ia = bd_scores["Косвенная агрессия"]
+        irritability = bd_scores["Раздражение"]
+        negativism = bd_scores["Негативизм"]
+        resentment = bd_scores["Обида"]
+        suspicion = bd_scores["Подозрительность"]
+        va = bd_scores["Вербальная агрессия"]
+        guilt = bd_scores["Угрызения совести"]
+
+        # Расчёт через нечеткую систему
+        al = self.fuzzy_system.calculate_aggression_level(assault, ia, irritability, va)
+        hostility = self.fuzzy_system.calculate_hostility(resentment, suspicion)
+        deviance = self.fuzzy_system.calculate_deviance(al, hostility, negativism, guilt)
+        self._debug_deviance_rules(al, hostility, negativism, guilt, deviance)
+
+        # Собираем результаты для отображения
+        scores = {
+            "Физическая агрессия": assault,
+            "Косвенная агрессия": ia,
+            "Раздражение": irritability,
+            "Негативизм": negativism,
+            "Обида": resentment,
+            "Подозрительность": suspicion,
+            "Вербальная агрессия": va,
+            "Угрызения совести": guilt
+        }
+
+        results = {
+            'aggression_level': al,
+            'hostility': hostility,
+            'negativism': negativism,
+            'guilt': guilt,
+            'deviance': deviance
+        }
+
+        BussDurkeeDashboard(self.root, results, scores, self.answers, self.user_fio, self.user_age,
+                            self.user_gender).show()
 
 
     def toggle_description(self):

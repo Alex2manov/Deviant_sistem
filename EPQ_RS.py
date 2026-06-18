@@ -908,6 +908,88 @@ class EPQRSQuizApp(FullscreenMixin):
         from main import MainMenu
         MainMenu(self.root, self.user_fio, self.user_gender, self.user_age)
 
+    def _debug_deviance_rules(self, extraversion, neuroticism, psychoticism, lie, deviance):
+        e_fuzzy = self.fuzzy_system.fuzzify(extraversion, self.fuzzy_system.e_inputs['extraversion']['mfs'])
+        n_fuzzy = self.fuzzy_system.fuzzify(neuroticism, self.fuzzy_system.n_inputs['neuroticism']['mfs'])
+        p_fuzzy = self.fuzzy_system.fuzzify(psychoticism, self.fuzzy_system.p_inputs['psychoticism']['mfs'])
+        l_fuzzy = self.fuzzy_system.fuzzify(lie, self.fuzzy_system.l_inputs['lie']['mfs'])
+
+        # Термы для каждой шкалы
+        e_terms = ['strong_introvert', 'introvert', 'ambivert', 'extravert', 'strong_extravert']
+        n_terms = ['low', 'average', 'high', 'very_high']
+        p_terms = ['low', 'average', 'high']
+        l_terms = ['low', 'average', 'high']
+
+        out_names = {1: 'low (очень низкий)', 2: 'middle (низкий)',
+                     3: 'elevated (средний)', 4: 'high (высокий)', 5: 'very_high (критический)'}
+
+        print("ОТЛАДКА ИТОГОВОЙ СИСТЕМЫ EPQ-RS")
+
+        print("\n1. ФАЗЗИФИКАЦИЯ ВХОДНЫХ ЗНАЧЕНИЙ:")
+        print(f"   Экстраверсия = {extraversion}")
+        for i, t in enumerate(e_terms, 1):
+            val = e_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Экстраверсия: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Нейротизм = {neuroticism}")
+        for i, t in enumerate(n_terms, 1):
+            val = n_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Нейротизм: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Психотизм = {psychoticism}")
+        for i, t in enumerate(p_terms, 1):
+            val = p_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Психотизм: {t} (индекс {i}) = {val:.3f}")
+
+        print(f"\n   Искренность = {lie}")
+        for i, t in enumerate(l_terms, 1):
+            val = l_fuzzy.get(t, 0)
+            if val > 0:
+                print(f"      Искренность: {t} (индекс {i}) = {val:.3f}")
+
+        print("\n2. АКТИВИРОВАННЫЕ ПРАВИЛА:")
+
+        active_rules = []
+        for rule in self.fuzzy_system.rules:
+            e_idx, n_idx, p_idx, l_idx, out = rule
+
+            # Получаем степени принадлежности
+            e_val = 1.0 if e_idx == 0 or e_idx < 0 else e_fuzzy.get(e_terms[e_idx - 1], 0) if 1 <= e_idx <= len(
+                e_terms) else 0
+            n_val = 1.0 if n_idx == 0 or n_idx < 0 else n_fuzzy.get(n_terms[n_idx - 1], 0) if 1 <= n_idx <= len(
+                n_terms) else 0
+            p_val = 1.0 if p_idx == 0 or p_idx < 0 else p_fuzzy.get(p_terms[p_idx - 1], 0) if 1 <= p_idx <= len(
+                p_terms) else 0
+            l_val = 1.0 if l_idx == 0 or l_idx < 0 else l_fuzzy.get(l_terms[l_idx - 1], 0) if 1 <= l_idx <= len(
+                l_terms) else 0
+
+            activation = min(e_val, n_val, p_val, l_val)
+            if activation > 0.01:
+                active_rules.append((rule, activation, out))
+
+        active_rules.sort(key=lambda x: x[1], reverse=True)
+
+        for rule, activation, out in active_rules[:30]:
+            e_idx, n_idx, p_idx, l_idx, out = rule
+            print(f"   Rule ({e_idx},{n_idx},{p_idx},{l_idx}) → out={out}, активация={activation:.3f}")
+
+        print(f"\n   Всего активных правил: {len(active_rules)}")
+
+        # Максимальная активация по выходным термам
+        max_out = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        for rule, activation, out in active_rules:
+            max_out[out] = max(max_out[out], activation)
+
+        print("\n3. МАКСИМАЛЬНАЯ АКТИВАЦИЯ ПО ВЫХОДНЫМ ТЕРМАМ:")
+        for out, act in max_out.items():
+            if act > 0:
+                print(f"   {out_names.get(out)}: {act:.3f}")
+
+        print(f"\n4. ИТОГОВЫЙ РЕЗУЛЬТАТ: {deviance:.2f}")
+
     def show_welcome(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -977,6 +1059,8 @@ class EPQRSQuizApp(FullscreenMixin):
         tk.Button(btn_frame, text="Начать тест", command=self.start_test,
                   bg="#27ae60", fg="white", font=("Segoe UI", 11, "bold"),
                   padx=30, pady=10, relief=tk.FLAT, cursor="hand2").pack()
+        tk.Button(btn_frame, text="Ввести результаты вручную", command=self.manual_input, bg="#95a5a6", fg="white",
+                  font=("Segoe UI", 10), padx=20, pady=5, relief=tk.FLAT, cursor="hand2").pack(pady=(8, 0))
 
     def start_test(self):
         if not self.user_fio:
@@ -1144,6 +1228,13 @@ class EPQRSQuizApp(FullscreenMixin):
             scores['lie_norm']
         )
 
+        self._debug_deviance_rules(
+            scores['extraversion'],
+            scores['neuroticism'],
+            scores['psychoticism'],
+            scores['lie_norm'],
+            deviance
+        )
 
         dashboard = EPQRSDashboard(
             self.root,
@@ -1157,6 +1248,99 @@ class EPQRSQuizApp(FullscreenMixin):
             scores['lie_raw'],
             scores['lie_norm'],
             scores['is_valid'],
+            self.answers,
+            self.user_fio,
+            self.user_age,
+            self.user_gender
+        )
+        dashboard.show()
+
+    def manual_input(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Ручной ввод - EPQ-RS")
+        dialog.geometry("500x450")
+        dialog.configure(bg="#f0f4f8")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        try:
+            dialog.iconbitmap("icon.ico")
+        except:
+            pass
+
+        tk.Label(dialog, text="Введите баллы по шкалам (0-100)", font=("Segoe UI", 12, "bold"), fg="#2c3e50",
+                 bg="#f0f4f8").pack(pady=10)
+
+        canvas = tk.Canvas(dialog, bg="#f0f4f8", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
+        scroll_frame = tk.Frame(canvas, bg="#f0f4f8")
+        scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        entries = {}
+        scales = ["Экстраверсия", "Нейротизм", "Психотизм", "Искренность"]
+
+        for s in scales:
+            frame = tk.Frame(scroll_frame, bg="#f0f4f8")
+            frame.pack(fill=tk.X, padx=20, pady=3)
+            tk.Label(frame, text=s, font=("Segoe UI", 10), width=25, anchor="w", bg="#f0f4f8").pack(side=tk.LEFT)
+            var = tk.DoubleVar(value=50)
+            entries[s] = var
+            tk.Scale(frame, from_=0, to=100, orient="horizontal", variable=var, length=200, bg="#f0f4f8",
+                     troughcolor="#d5dbdb").pack(side=tk.LEFT, padx=10)
+
+        canvas.pack(side="left", fill="both", expand=True, padx=10)
+        scrollbar.pack(side="right", fill="y")
+
+        def calc():
+            scores = {n: v.get() for n, v in entries.items()}
+            dialog.destroy()
+            self.calculate_from_scores(scores, self.user_fio, self.user_gender, self.user_age)
+
+        tk.Button(dialog, text="Рассчитать", command=calc, bg="#27ae60", fg="white", font=("Segoe UI", 11), padx=20,
+                  pady=5, relief=tk.FLAT).pack(pady=15)
+
+    def calculate_from_scores(self, epq_scores, fio=None, gender=None, age=None):
+        if fio:
+            self.user_fio = fio
+        if gender:
+            self.user_gender = gender
+        if age:
+            self.user_age = age
+
+        extraversion = epq_scores["Экстраверсия"]
+        neuroticism = epq_scores["Нейротизм"]
+        psychoticism = epq_scores["Психотизм"]
+        lie = epq_scores["Искренность"]
+
+        deviance = self.fuzzy_system.calculate_deviance(extraversion, neuroticism, psychoticism, lie)
+        self._debug_deviance_rules(extraversion, neuroticism, psychoticism, lie, deviance)
+
+        # Для совместимости с Dashboard создаём структуру scores
+        scores = {
+            'extraversion': extraversion,
+            'neuroticism': neuroticism,
+            'psychoticism': psychoticism,
+            'lie_norm': lie
+        }
+
+        raw_scores = {
+            'extraversion_raw': round(extraversion / 100 * 12),
+            'neuroticism_raw': round(neuroticism / 100 * 12),
+            'psychoticism_raw': round(psychoticism / 100 * 12),
+            'lie_raw': round(lie / 100 * 12)
+        }
+
+        is_valid = raw_scores['lie_raw'] >= 2
+
+        dashboard = EPQRSDashboard(
+            self.root,
+            scores,
+            raw_scores,
+            deviance,
+            raw_scores['lie_raw'],
+            lie,
+            is_valid,
             self.answers,
             self.user_fio,
             self.user_age,

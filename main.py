@@ -196,6 +196,16 @@ class MainMenu(FullscreenMixin):
                  font=("Segoe UI", 11), fg="#555", bg="#ffffff", justify=tk.CENTER, anchor="center").pack(
             fill=tk.X, padx=15, pady=(0, 10))
 
+        btn_frame_bottom = tk.Frame(main, bg="#e8eef2")
+        btn_frame_bottom.pack(fill=tk.X, pady=(5, 15))
+
+        btn_load = tk.Button(btn_frame_bottom, text="Загрузить результаты из CSV",
+                             command=self.load_csv_results,
+                             bg="#f39c12", fg="white", font=("Segoe UI", 10),
+                             padx=15, pady=5, relief=tk.FLAT, cursor="hand2")
+        btn_load.pack()
+
+
     def _on_gender_change(self):
         if self.gender_male.get() and self.gender_female.get():
             self.gender_female.set(False)
@@ -287,6 +297,45 @@ class MainMenu(FullscreenMixin):
             new_root = tk.Tk()
             app = MainMenu(new_root)
             new_root.mainloop()
+
+    def load_csv_results(self):
+        from data_loader import DataLoader
+        from FPI import FPIQuizApp
+        from buss_durkee import BussDurkeeQuizApp
+        from EPQ_RS import EPQRSQuizApp
+
+        filepath = DataLoader.select_file(self.root)
+        if not filepath:
+            return
+
+        try:
+            data = DataLoader.load_csv(filepath)
+            test_name = data.get("test_name", "")
+
+            if test_name == "FPI":
+                # Запускаем FPI и загружаем результаты
+                for widget in self.root.winfo_children():
+                    widget.destroy()
+                app = FPIQuizApp(self.root)
+                DataLoader.process_fpi_file(app, filepath)
+
+            elif test_name == "BussDurkee":
+                for widget in self.root.winfo_children():
+                    widget.destroy()
+                app = BussDurkeeQuizApp(self.root)
+                DataLoader.process_buss_durkee_file(app, filepath)
+
+            elif test_name == "EPQ_RS":
+                for widget in self.root.winfo_children():
+                    widget.destroy()
+                app = EPQRSQuizApp(self.root)
+                DataLoader.process_epq_file(app, filepath)
+
+            else:
+                messagebox.showwarning("Внимание", f"Неизвестный тип теста: {test_name}")
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить файл:\n{str(e)}")
 
 
 def main():
