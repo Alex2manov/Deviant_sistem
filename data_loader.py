@@ -5,11 +5,9 @@ from datetime import datetime
 
 
 class DataLoader:
-    """Класс для загрузки результатов тестирования из CSV-файлов"""
 
     @staticmethod
     def load_csv(filepath):
-        """Загружает данные из CSV-файла"""
         with open(filepath, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             rows = list(reader)
@@ -21,7 +19,6 @@ class DataLoader:
 
     @staticmethod
     def extract_respondent_data(data):
-        """Извлекает данные респондента из CSV"""
         return {
             'fio': data.get("fio", ""),
             'gender': data.get("gender", ""),
@@ -32,7 +29,6 @@ class DataLoader:
 
     @staticmethod
     def extract_answers(data, test_name):
-        """Извлекает ответы из CSV в зависимости от типа теста"""
         answers = []
 
         if test_name == "FPI":
@@ -54,7 +50,6 @@ class DataLoader:
 
     @staticmethod
     def select_file(parent, title="Выберите CSV-файл"):
-        """Открывает диалог выбора файла"""
         from tkinter import filedialog
         return filedialog.askopenfilename(
             title=title,
@@ -63,7 +58,6 @@ class DataLoader:
 
     @staticmethod
     def process_fpi_file(app, filepath):
-        """Обрабатывает CSV-файл с результатами FPI"""
         data = DataLoader.load_csv(filepath)
         respondent = DataLoader.extract_respondent_data(data)
         answers = DataLoader.extract_answers(data, "FPI")
@@ -86,7 +80,6 @@ class DataLoader:
 
     @staticmethod
     def process_buss_durkee_file(app, filepath):
-        """Обрабатывает CSV-файл с результатами Басса-Дарки"""
         data = DataLoader.load_csv(filepath)
         respondent = DataLoader.extract_respondent_data(data)
         answers = DataLoader.extract_answers(data, "BussDurkee")
@@ -108,7 +101,6 @@ class DataLoader:
 
     @staticmethod
     def process_epq_file(app, filepath):
-        """Обрабатывает CSV-файл с результатами EPQ-RS (как в FPI)"""
         from EPQ_RS import EPQRSTest, EPQRSDashboard
 
         data = DataLoader.load_csv(filepath)
@@ -128,8 +120,6 @@ class DataLoader:
 
         scores = app.test.calculate_scores()
 
-        # ВЫЗЫВАЕМ calculate_from_scores — КАК В FPI!
-        # Для этого нужно передать scores в правильном формате
         epq_scores = {
             "Экстраверсия": scores['extraversion'],
             "Нейротизм": scores['neuroticism'],
